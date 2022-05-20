@@ -1,0 +1,44 @@
+package com.SpringApp.config;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+
+import com.SpringApp.filter.JwtFilter;
+//@Configuration : Tags the class as a source of bean definitions for the application context.
+//The @EnableWebSecurity is a marker annotation. It allows Spring to find (it's a @Configuration and, therefore, @Component ) 
+//and automatically apply the class to the global WebSecurity .
+@Configuration
+@EnableWebSecurity
+public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
+
+	@Autowired
+	private JwtFilter jwtFilter;
+	
+	@Override
+	protected void configure(HttpSecurity http) throws Exception {
+		http.cors().and().csrf()
+		.disable()
+		.authorizeRequests().antMatchers("/")
+		.permitAll()
+		.anyRequest()
+		.authenticated()
+		.and()
+		.sessionManagement()
+		.sessionCreationPolicy(SessionCreationPolicy.STATELESS); 
+		http.addFilterBefore(jwtFilter,UsernamePasswordAuthenticationFilter.class);
+		
+	}
+	
+	@Override
+	@Bean
+	public AuthenticationManager authenticationManagerBean() throws Exception {
+	    return super.authenticationManagerBean();
+	}
+}
